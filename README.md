@@ -2,26 +2,23 @@
 ## Contents
 * [Installation](#installation)
 * [Using](#using)
-    * [Init RightSignature factory](#init-rs-factory)
-    * [Working with documents](#working-with-docs)
-    * [Working with templates](#working-with-tpls)
-* [Exceptions handling](#exceptions)
-* [Request, Response, Conection. Use custom authorization](#custom)
+    * [Init RightSignature factory](#1-init-rightsignature-factory)
+    * [Working with documents](#2-working-with-documents)
+    * [Working with templates](#3-working-with-templates)
+* [Exceptions handling](#4-exceptions-handling)
+* [Request, Response, Conection. Use custom authorization](#5-request-response-conection-use-custom-authorization)
 
-<a name="installation"></a>
 ## Installation
 > Documentation in progress
 
-<a name="using"></a>
 ## Using
-<a name="init-rs-factory"></a>
 ### 1. Init RightSignature factory
 ```php
 use RightSignature\RightSignature;
 $rs = new RightSignature($token);
 ```
 Where `$token` is your RightSignature API token.
-<a name="working-with-docs"></a>
+
 ### 2. Working with documents
 #### 1. Init an empty Document model
 ```php
@@ -166,17 +163,14 @@ $content = $document->load($guid)->get();
 ```
 `load()` method will return `\StdClass()' contains documents data.
 
-<a name="working-with-tpls"></a>
 ### 3. Working with Templates
 
 > Documentation in progress
 
-<a name="exceptions"></a>
-### 4. Exceptions handling
+## 3. Exceptions handling
 
 > Documentation in progress
 
-<a name="custom"></a>
-### 5. Request, Response, Conection. Use custom authorization.
+## 4. Request, Response, Conection. Use custom authorization.
 
 > Documentation in progress
