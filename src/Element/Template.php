@@ -3,9 +3,6 @@ namespace RightSignature\Element;
 
 use RightSignature\Pattern\ConnectionInterface,
     RightSignature\Pattern\ElementInterface;
-use RightSignature\Request;
-
-;
 
 /**
  * Class Template
