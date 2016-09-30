@@ -72,10 +72,17 @@ class Template implements ElementInterface
      * @param array $guids one or more template guids
      * @return self
      */
-    public function prepackage($guids = [])
+    public function prepackage($guids = [], $callback = null)
     {
+        $arguments = [];
+        if (!is_array($guids)) {
+            $guids = [$this->resolveGuid($guids)];
+        }
+        if ($callback !== null) {
+            $arguments['callback_location'] = $callback;
+        }
         $guids = implode(',', $guids);
-        $template = $this->connection->connect('templates/' . $guids . '/prepackage')->template;
+        $template = $this->connection->connect('templates/' . $guids . '/prepackage', $arguments)->template;
         $this->template = $template;
         return $this;
     }
