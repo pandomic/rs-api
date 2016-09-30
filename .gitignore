@@ -1,0 +1,5 @@
+test.php
+composer.phar
+composer.lock
+/.idea
+/vendor
