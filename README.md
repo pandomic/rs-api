@@ -156,16 +156,122 @@ $status = $document->send($documentPath, $options);
 Where `$documentPath` is document local path.
 
 `send()` method will return `boolean` operation status.
+
 #### 11. Get loaded document info
 To get loaded document info simply call `get()` method:
 ```php
 $content = $document->load($guid)->get();
 ```
-`load()` method will return `\StdClass()' contains documents data.
+`load()` method will return `\StdClass()` contains documents data.
 
 ### 3. Working with Templates
+#### 1. Init an empty Template model
+```php
+$template = $rs->template();
+```
+#### 2. Init and preload Template
+```php
+$template = $rs->template($guid);
+```
+Where `$guid` is RS template guid
 
-> Documentation in progress
+#### 3. Loading template
+Installing guid property
+```php
+$template->guid($guid)->load();
+```
+Passing guid using load() method
+```php
+$template->load($guid);
+```
+After loading template will be stored inside the Template object, so that you can use some methods without `$guid` specified:
+```php
+$template->load($guid);
+// Do some actions
+$template->load()->prepackage()->prefill($options)->get();
+```
+#### 4. Load templates list
+You can get templates countable information by calling `getCount()` method:
+```php
+$info = $template->getCount();
+// $info = [
+//    'total_documents' => 'returns total templates count',
+//    'total_pages'     => 'returns total pages count limited by 10 items per page'
+// ]
+```
+Templates page can be obtained:
+```php
+$templates = $template->loadList();
+// Or using extra parameters
+$templates = $template->loadList($page, $perPage, $search);
+```
+Where `$page`- page number to fetch, `$perPage` - items count on page, `$search` - search string.
+
+`loadList()` will return `array` of `\StdClass`.
+
+#### 5. Prepackage Template(s)
+```php
+// Using single guid
+$template->prepackage($guid);
+
+// Using array of guids
+$template->prepackage($guids);
+
+// Prepackaging preloaded template
+$template->load($guid)->prepackage();
+
+// Prepackaging single/multiple templates with callback setting
+$template->prepackage($guid|$guids, $callback);
+
+// Prepackaging preloaded template with callback setting
+$template->load($guid)->prepackage(null, $callback);
+```
+Where `$callback` is URL to post the document status
+
+#### 6. Prefilling template
+After prepackaging you may want to add/update some template info:
+```php
+// $options = [
+//    'subject'           => 'document subject',
+//    'description'       => 'document description',
+//    'expires_in'        => 'document expiration date',
+//    'callback_location' => 'document created callback URL',
+//    'roles'             => [
+//        [
+//            'role_name' => 'role name to fill',
+//            'role_id'   => 'role id to fill (use role_name or role_id)',
+//            'name'      => 'name to fill the field with',
+//            'email'     => 'email to fill the field with'
+//        ],...
+//    ],
+//    'tags' => [
+//        [
+//           'name'  => 'tag name',
+//           'value' => 'tag value (optional)'
+//        ], ...
+//    ],
+//    'merge_fields' => [
+//        [
+//            'merge_field_id'   => 'field id to fill',
+//            'merge_field_name' => 'field name to fill (use merge_field_id or merge_field_name)',
+//            'value'            => 'field value',
+//            'locked'           => 'lock field from changes'
+//        ],...
+//    ]
+// ]
+$template->prefill($options, $guid);
+
+// Prefill previously loaded template
+$template->load($guid)->prepackage()->prefill($options);
+```
+Not all of these `$options` must be set. See [RightSignature official API documentation](https://rightsignature.com/apidocs/api_documentation_default#/prefill_template) for more details.
+
+#### 7. Get loaded template info
+To get loaded template info simply call `get()` method:
+```php
+$content = $template->load($guid)->get();
+```
+`load()` method will return `\StdClass()` contains templates data.
 
 ## 3. Exceptions handling
 
