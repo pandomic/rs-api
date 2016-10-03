@@ -1,15 +1,40 @@
 # RightSignature API
 ## Contents
+* [Requirements](#requirements)
 * [Installation](#installation)
 * [Using](#using)
     * [Init RightSignature factory](#1-init-rightsignature-factory)
     * [Working with documents](#2-working-with-documents)
     * [Working with templates](#3-working-with-templates)
-* [Exceptions handling](#4-exceptions-handling)
-* [Request, Response, Conection. Use custom authorization](#5-request-response-conection-use-custom-authorization)
+* [Exceptions handling](#3-exceptions-handling)
+* [Request, Response, Conection. Use custom authorization](#4-request-response-conection-use-custom-authorization)
+
+## Requirements
+1. PHP >= 5.6
+2. lib-libxml
+3. Composer
 
 ## Installation
-> Documentation in progress
+RS API can be installed via composer.
+
+Add vcs repo to your `composer.json`:
+```json
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/pandomic/rs-api"
+    }
+]
+```
+
+Add `pandomic/rs-api` dependency to your `composer.json`:
+```json
+"require": {
+     "php": ">=5.6",
+     "pandomic/rs-api": "0.1"
+ }
+```
+Where `0.1` is a repo version that you want to use.
 
 ## Using
 ### 1. Init RightSignature factory
