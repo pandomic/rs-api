@@ -71,7 +71,7 @@ class Template implements ElementInterface
      * @param string $documentPath local path to the document to load
      * @param array $options swap options
      * @param null|string $guid prepackaged template guid
-     * @return self
+     * @return Document
      */
     public function swapDocument($documentPath, $options, $guid = null)
     {
@@ -89,9 +89,12 @@ class Template implements ElementInterface
         $xml->addChild('action', 'prefill');
         $xml = $this->_prefill($xml, $options);
 
-        $document = $this->connection->connect(
+        $response = $this->connection->connect(
             'templates', [], [], 'POST', $xml->asXML()
-        );
+        )->document;
+
+        $document = new Document($this->connection);
+        $document->guid($response->guid);
 
         return $document;
     }
