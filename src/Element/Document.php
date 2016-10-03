@@ -1,8 +1,17 @@
 <?php
+/**
+ * Simple RightSignature token-based API
+ *
+ * @author Vlad Gramuzov <vlad.gramuzov@gmail.com>
+ * @url https://github.com/pandomic/rs-api
+ * @license MIT
+ */
+
 namespace RightSignature\Element;
 
 use RightSignature\Pattern\ConnectionInterface,
-    RightSignature\Pattern\ElementInterface;
+    RightSignature\Pattern\ElementInterface,
+    \SimpleXMLElement;
 
 /**
  * Class Document
@@ -171,7 +180,7 @@ class Document implements ElementInterface
     public function updateTags($tags, $guid = null)
     {
         $guid = $this->resolveGuid($guid);
-        $xml = new \SimpleXMLElement('<tags/>');
+        $xml = new SimpleXMLElement('<tags/>');
         foreach ($tags as $tag) {
             $tagNode = $xml->addChild('tag');
             if (!empty($tag['name'])) {
@@ -215,7 +224,7 @@ class Document implements ElementInterface
         preg_match('((?:\/|\\)?([a-z0-9_\-.\?%=&]+)$)i', $documentPath, $matches);
         $fileName = $matches[1];
 
-        $xml = new \SimpleXMLElement('<document/>');
+        $xml = new SimpleXMLElement('<document/>');
 
         $docData = $xml->addChild('document_data');
         $docData->addChild('type', 'base64');
@@ -311,7 +320,7 @@ class Document implements ElementInterface
     public function updateCallback($callback, $guid = null)
     {
         $guid = $this->resolveGuid($guid);
-        $xml = new \SimpleXMLElement("<callback_location>{$callback}</callback_location>");
+        $xml = new SimpleXMLElement("<callback_location>{$callback}</callback_location>");
         $response = $this->connection->connect(
             'documents/' . $guid . '/update_callback', [], [], 'POST', $xml->asXML()
         );
@@ -336,8 +345,8 @@ class Document implements ElementInterface
     protected function resolveGuid($guid)
     {
         if ($guid == null) {
-            if ($this->template) {
-                return $this->template->guid;
+            if ($this->document) {
+                return $this->document->guid;
             } else {
                 return $this->guid;
             }

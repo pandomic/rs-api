@@ -1,4 +1,12 @@
 <?php
+/**
+ * Simple RightSignature token-based API
+ *
+ * @author Vlad Gramuzov <vlad.gramuzov@gmail.com>
+ * @url https://github.com/pandomic/rs-api
+ * @license MIT
+ */
+
 namespace RightSignature;
 
 use RightSignature\Element\Template,
@@ -11,7 +19,7 @@ use RightSignature\Element\Template,
 class RightSignature
 {
     /**
-     * @var ConnectionIn
+     * @var Connection
      */
     protected $connection;
 

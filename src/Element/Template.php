@@ -1,8 +1,17 @@
 <?php
+/**
+ * Simple RightSignature token-based API
+ *
+ * @author Vlad Gramuzov <vlad.gramuzov@gmail.com>
+ * @url https://github.com/pandomic/rs-api
+ * @license MIT
+ */
+
 namespace RightSignature\Element;
 
 use RightSignature\Pattern\ConnectionInterface,
-    RightSignature\Pattern\ElementInterface;
+    RightSignature\Pattern\ElementInterface,
+    \SimpleXMLElement;
 
 /**
  * Class Template
@@ -47,6 +56,47 @@ class Template implements ElementInterface
     }
 
     /**
+     * Swap Template underlying document
+     *
+     * Allowed options:
+     * - subject
+     * - description
+     * - expires_in
+     * - roles
+     * - merge_fields
+     * - tags
+     * - callback_location
+     *
+     * @see https://rightsignature.com/apidocs/api_documentation_default#/swap_underlying_pdf
+     * @param string $documentPath local path to the document to load
+     * @param array $options swap options
+     * @param null|string $guid prepackaged template guid
+     * @return self
+     */
+    public function swapDocument($documentPath, $options, $guid = null)
+    {
+        $document = file_get_contents($documentPath);
+        $document = base64_encode($document);
+
+        $guid = $this->resolveGuid($guid);
+        $xml = new SimpleXMLElement('<template/>');
+
+        $documentData = $xml->addChild('document_data');
+        $documentData->addChild('type', 'base64');
+        $documentData->addChild('value', $document);
+
+        $xml->addChild('guid', $guid);
+        $xml->addChild('action', 'prefill');
+        $xml = $this->_prefill($xml, $options);
+
+        $document = $this->connection->connect(
+            'templates', [], [], 'POST', $xml->asXML()
+        );
+
+        return $document;
+    }
+
+    /**
      * Load single template
      * @param null|string $guid template guid
      * @return self
@@ -67,6 +117,7 @@ class Template implements ElementInterface
      * Clone template or merge templates
      *
      * @param array $guids one or more template guids
+     * @param string $callback callback URL
      * @return self
      */
     public function prepackage($guids = [], $callback = null)
@@ -74,6 +125,8 @@ class Template implements ElementInterface
         $arguments = [];
         if (!is_array($guids)) {
             $guids = [$this->resolveGuid($guids)];
+        } else if (empty($guids)) {
+            $guids = [$this->resolveGuid(null)];
         }
         if ($callback !== null) {
             $arguments['callback_location'] = $callback;
@@ -103,85 +156,47 @@ class Template implements ElementInterface
     public function prefill($options, $guid = null)
     {
         $guid = $this->resolveGuid($guid);
-        $options['guid'] = $guid;
 
-        $xml = new \SimpleXMLElement('<template/>');
+        $xml = new SimpleXMLElement('<template/>');
 
         $xml->addChild('guid', $guid);
         $xml->addChild('action', 'fill');
-
-        if (!empty($options['subject'])) {
-            $xml->addChild('subject', $options['subject']);
-        }
-
-        if (!empty($options['description'])) {
-            $xml->addChild('description', $options['description']);
-        }
-
-        if (!empty($options['expires_in'])) {
-            $xml->addChild('expires_in', $options['expires_in']);
-        }
-
-        if (!empty($options['callback_location'])) {
-            $xml->addChild('callback_location', $options['callback_location']);
-        }
-
-        if (!empty($options['roles'])) {
-            $roles = $xml->addChild('roles');
-            foreach ($options['roles'] as $role) {
-                $roleNode = $roles->addChild('role');
-                if (!empty($role['role_name'])) {
-                    $roleNode->addAttribute('role_name', $role['role_name']);
-                }
-                if (!empty($role['role_id'])) {
-                    $roleNode->addAttribute('role_id', $role['role_id']);
-                }
-                if (!empty($role['name'])) {
-                    $roleNode->addChild('name', $role['name']);
-                }
-                if (!empty($role['email'])) {
-                    $roleNode->addChild('email', $role['email']);
-                }
-            }
-        }
-
-        if (!empty($options['tags'])) {
-            $tags = $xml->addChild('tags');
-            foreach ($options['tags'] as $tag) {
-                $tagNode = $tags->addChild('tag');
-                if (!empty($tag['name'])) {
-                    $tagNode->addChild('name', $tag['name']);
-                }
-                if (!empty($tag['value'])) {
-                    $tagNode->addChild('value', $tag['value']);
-                }
-            }
-        }
-
-        if (!empty($options['merge_fields'])) {
-            $tags = $xml->addChild('merge_fields');
-            foreach ($options['merge_fields'] as $field) {
-                $fieldNode = $tags->addChild('merge_field');
-                if (!empty($field['merge_field_id'])) {
-                    $fieldNode->addAttribute('merge_field_id', $field['merge_field_id']);
-                }
-                if (!empty($field['merge_field_name'])) {
-                    $fieldNode->addAttribute('merge_field_name', $field['merge_field_name']);
-                }
-                if (!empty($field['value'])) {
-                    $fieldNode->addChild('value', $field['value']);
-                }
-                if (!empty($field['locked'])) {
-                    $fieldNode->addChild('locked', $field['locked']);
-                }
-            }
-        }
+        $xml = $this->_prefill($xml, $options);
 
         $this->template = $this->connection->connect(
             'templates', [], [], 'POST', $xml->asXML()
         )->template;
 
         return $this;
+    }
+
+    /**
+     * Prefill template and send it as document
+     *
+     * @see prefill() for allowed options
+     * @see https://rightsignature.com/apidocs/api_documentation_default#/prefill_template
+     *
+     * @param array $options
+     * @param null|string $guid prepackaged template guid
+     * @return Document non-preloaded Document instance
+     */
+    public function prefillAndSend($options, $guid = null)
+    {
+        $guid = $this->resolveGuid($guid);
+        $xml = new SimpleXMLElement('<template/>');
+
+        $xml->addChild('guid', $guid);
+        $xml->addChild('action', 'send');
+        $xml = $this->_prefill($xml, $options);
+
+        $response = $this->connection->connect(
+            'templates', [], [], 'POST', $xml->asXML()
+        )->document;
+
+        $document = new Document($this->connection);
+        $document->guid($response->guid);
+
+        return $document;
     }
 
     /**
@@ -257,5 +272,83 @@ class Template implements ElementInterface
         }
 
         return $guid;
+    }
+
+    /**
+     * Bind xml data according to the given options
+     * @param SimpleXMLElement $element
+     * @param array $options
+     * @return SimpleXMLElement
+     */
+    private function _prefill(SimpleXMLElement $element, $options)
+    {
+        if (!empty($options['subject'])) {
+            $element->addChild('subject', $options['subject']);
+        }
+
+        if (!empty($options['description'])) {
+            $element->addChild('description', $options['description']);
+        }
+
+        if (!empty($options['expires_in'])) {
+            $element->addChild('expires_in', $options['expires_in']);
+        }
+
+        if (!empty($options['callback_location'])) {
+            $element->addChild('callback_location', $options['callback_location']);
+        }
+
+        if (!empty($options['roles'])) {
+            $roles = $element->addChild('roles');
+            foreach ($options['roles'] as $role) {
+                $roleNode = $roles->addChild('role');
+                if (!empty($role['role_name'])) {
+                    $roleNode->addAttribute('role_name', $role['role_name']);
+                }
+                if (!empty($role['role_id'])) {
+                    $roleNode->addAttribute('role_id', $role['role_id']);
+                }
+                if (!empty($role['name'])) {
+                    $roleNode->addChild('name', $role['name']);
+                }
+                if (!empty($role['email'])) {
+                    $roleNode->addChild('email', $role['email']);
+                }
+            }
+        }
+
+        if (!empty($options['tags'])) {
+            $tags = $element->addChild('tags');
+            foreach ($options['tags'] as $tag) {
+                $tagNode = $tags->addChild('tag');
+                if (!empty($tag['name'])) {
+                    $tagNode->addChild('name', $tag['name']);
+                }
+                if (!empty($tag['value'])) {
+                    $tagNode->addChild('value', $tag['value']);
+                }
+            }
+        }
+
+        if (!empty($options['merge_fields'])) {
+            $tags = $element->addChild('merge_fields');
+            foreach ($options['merge_fields'] as $field) {
+                $fieldNode = $tags->addChild('merge_field');
+                if (!empty($field['merge_field_id'])) {
+                    $fieldNode->addAttribute('merge_field_id', $field['merge_field_id']);
+                }
+                if (!empty($field['merge_field_name'])) {
+                    $fieldNode->addAttribute('merge_field_name', $field['merge_field_name']);
+                }
+                if (!empty($field['value'])) {
+                    $fieldNode->addChild('value', $field['value']);
+                }
+                if (!empty($field['locked'])) {
+                    $fieldNode->addChild('locked', $field['locked']);
+                }
+            }
+        }
+
+        return $element;
     }
 }

@@ -1,4 +1,12 @@
 <?php
+/**
+ * Simple RightSignature token-based API
+ *
+ * @author Vlad Gramuzov <vlad.gramuzov@gmail.com>
+ * @url https://github.com/pandomic/rs-api
+ * @license MIT
+ */
+
 namespace RightSignature;
 
 use RightSignature\Exception\ConnectionException,
@@ -170,6 +178,10 @@ class Request
         return new Response($response);
     }
 
+    /**
+     * Send simple http request
+     * @return mixed http response
+     */
     public function send()
     {
         $curl = curl_init();
