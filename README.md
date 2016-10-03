@@ -298,6 +298,86 @@ $content = $template->load($guid)->get();
 ```
 `load()` method will return `\StdClass()` contains templates data.
 
+#### 8. Prefill and send as document
+Sending prepackaged templates as a documents is similar with prefilling:
+```php
+// $options = [
+//    'subject'           => 'document subject',
+//    'description'       => 'document description',
+//    'expires_in'        => 'document expiration date',
+//    'callback_location' => 'document created callback URL',
+//    'roles'             => [
+//        [
+//            'role_name' => 'role name to fill',
+//            'role_id'   => 'role id to fill (use role_name or role_id)',
+//            'name'      => 'name to fill the field with',
+//            'email'     => 'email to fill the field with'
+//        ],...
+//    ],
+//    'tags' => [
+//        [
+//           'name'  => 'tag name',
+//           'value' => 'tag value (optional)'
+//        ], ...
+//    ],
+//    'merge_fields' => [
+//        [
+//            'merge_field_id'   => 'field id to fill',
+//            'merge_field_name' => 'field name to fill (use merge_field_id or merge_field_name)',
+//            'value'            => 'field value',
+//            'locked'           => 'lock field from changes'
+//        ],...
+//    ]
+// ]
+$document = $template->prefillAndSend($options, $guid);
+
+// Prefill and send previously loaded template
+$document = $template->load($guid)->prepackage()->prefillAndSend($options);
+
+// You can then use the `$document` to load the document and use it
+$document->load();
+$links = $document->getSignerLinks();
+```
+`prefillAndSend()` method will return the empty `Document` instance (with loaded guid but not preloaded, so that you can load document later). See [RightSignature official API documentation](https://rightsignature.com/apidocs/api_documentation_default#/prefill_template) for more options details.
+
+#### 9. Swap templates underlying data
+```php
+// $options = [
+//    'tags' => [
+//        [
+//           'name'  => 'tag name',
+//           'value' => 'tag value (optional)'
+//        ], ...
+//    ],
+//    'roles'             => [
+//        [
+//            'role_name' => 'role name to fill',
+//            'role_id'   => 'role id to fill (use role_name or role_id)',
+//            'name'      => 'name to fill the field with',
+//            'email'     => 'email to fill the field with'
+//        ],...
+//    ],
+//    'merge_fields' => [
+//        [
+//            'merge_field_id'   => 'field id to fill',
+//            'merge_field_name' => 'field name to fill (use merge_field_id or merge_field_name)',
+//            'value'            => 'field value',
+//            'locked'           => 'lock field from changes'
+//        ],...
+//    ]
+//    'subject'           => 'document subject',
+//    'expires_in'        => 'document expiration date',
+//    'description'       => 'document description',
+//    'callback_location' => 'callback url after document will be signed'
+// ]
+$document = $template->swapDocument($documentPath, $options, $guid);
+// Swap already preloaded template
+$document = $template->load($guid)->swapDocument($documentPath, $options);
+```
+Where `$documentPath` is a local document path to upload. `swapDocument()` will return an empty `Document` instance (with  guid but not preloaded). 
+
+See [RightSignature official API documentation](https://rightsignature.com/apidocs/api_documentation_default#/swap_underlying_pdf) for more details.
+
 ## 3. Exceptions handling
 
 > Documentation in progress
