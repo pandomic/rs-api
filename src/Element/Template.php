@@ -75,6 +75,9 @@ class Template implements ElementInterface
      */
     public function swapDocument($documentPath, $options, $guid = null)
     {
+        preg_match('(([a-z0-9_\-.\?%=&]+)$)i', $documentPath, $matches);
+        $fileName = $matches[1];
+
         $document = file_get_contents($documentPath);
         $document = base64_encode($document);
 
@@ -83,6 +86,7 @@ class Template implements ElementInterface
 
         $documentData = $xml->addChild('document_data');
         $documentData->addChild('type', 'base64');
+        $documentData->addChild('filename', $fileName);
         $documentData->addChild('value', $document);
 
         $xml->addChild('guid', $guid);

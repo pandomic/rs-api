@@ -221,7 +221,7 @@ class Document implements ElementInterface
         $document = file_get_contents($documentPath);
         $document = base64_encode($document);
 
-        preg_match('((?:\/|\\)?([a-z0-9_\-.\?%=&]+)$)i', $documentPath, $matches);
+        preg_match('(([a-z0-9_\-.\?%=&]+)$)i', $documentPath, $matches);
         $fileName = $matches[1];
 
         $xml = new SimpleXMLElement('<document/>');
@@ -274,6 +274,12 @@ class Document implements ElementInterface
                 if (!empty($role['name'])) {
                     $roleNode->addChild('name', $role['name']);
                 }
+                if (!empty($role['signer_sequence_number'])) {
+                    $roleNode->addChild('signer_sequence_number', $role['signer_sequence_number']);
+                }
+                if (!empty($role['name'])) {
+                    $roleNode->addChild('name', $role['name']);
+                }
                 if (!empty($role['email'])) {
                     $roleNode->addChild('email', $role['email']);
                 }
@@ -308,7 +314,13 @@ class Document implements ElementInterface
             'documents', [], [], 'POST', $xml->asXML()
         );
 
-        return strpos($response->document->status, 'sent') !== false;
+        if (strpos($response->document->status, 'sent') !== false) {
+            $this->guid = $response->document->guid;
+            $this->document = false;
+            return true;
+        }
+
+        return false;
     }
 
     /**
