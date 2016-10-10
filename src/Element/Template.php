@@ -59,6 +59,7 @@ class Template implements ElementInterface
      * Swap Template underlying document
      *
      * Allowed options:
+     * - action
      * - subject
      * - description
      * - expires_in
@@ -73,7 +74,7 @@ class Template implements ElementInterface
      * @param null|string $guid prepackaged template guid
      * @return Document
      */
-    public function swapDocument($documentPath, $options, $guid = null)
+    public function swapTemplate($documentPath, $options, $guid = null)
     {
         preg_match('(([a-z0-9_\-.\?%=&]+)$)i', $documentPath, $matches);
         $fileName = $matches[1];
@@ -83,6 +84,7 @@ class Template implements ElementInterface
 
         $guid = $this->resolveGuid($guid);
         $xml = new SimpleXMLElement('<template/>');
+        $action = !empty($options['action']) ? $options['action'] : 'prefill';
 
         $documentData = $xml->addChild('document_data');
         $documentData->addChild('type', 'base64');
@@ -90,7 +92,7 @@ class Template implements ElementInterface
         $documentData->addChild('value', $document);
 
         $xml->addChild('guid', $guid);
-        $xml->addChild('action', 'prefill');
+        $xml->addChild('action', $action);
         $xml = $this->_prefill($xml, $options);
 
         $response = $this->connection->connect(
@@ -165,9 +167,10 @@ class Template implements ElementInterface
         $guid = $this->resolveGuid($guid);
 
         $xml = new SimpleXMLElement('<template/>');
+        $action = !empty($options['action']) ? $options['action'] : 'fill';
 
         $xml->addChild('guid', $guid);
-        $xml->addChild('action', 'fill');
+        $xml->addChild('action', $action);
         $xml = $this->_prefill($xml, $options);
 
         $this->template = $this->connection->connect(
@@ -191,9 +194,10 @@ class Template implements ElementInterface
     {
         $guid = $this->resolveGuid($guid);
         $xml = new SimpleXMLElement('<template/>');
+        $action = !empty($options['action']) ? $options['action'] : 'send';
 
         $xml->addChild('guid', $guid);
-        $xml->addChild('action', 'send');
+        $xml->addChild('action', $action);
         $xml = $this->_prefill($xml, $options);
 
         $response = $this->connection->connect(

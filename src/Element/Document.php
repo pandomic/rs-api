@@ -225,13 +225,14 @@ class Document implements ElementInterface
         $fileName = $matches[1];
 
         $xml = new SimpleXMLElement('<document/>');
+        $action = !empty($options['action']) ? $options['action'] : 'send';
 
         $docData = $xml->addChild('document_data');
         $docData->addChild('type', 'base64');
         $docData->addChild('filename', $fileName);
         $docData->addChild('value', $document);
 
-        $xml->addChild('action', 'send');
+        $xml->addChild('action', $action);
 
         if (!empty($options['use_text_tags'])) {
             $flag = $options['use_text_tags'] ? 'true' : 'false';
