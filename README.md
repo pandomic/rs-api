@@ -152,6 +152,7 @@ To send document you'll need to add a few lines of code (full example):
 ```php
 // Not all of these options must be used, see api docs for more info
 // $options = [
+//    'action'     => 'send',
 //    'recipients' => [
 //        [
 //            'name'      => 'recipient name',
@@ -257,6 +258,7 @@ Where `$callback` is URL to post the document status
 After prepackaging you may want to add/update some template info:
 ```php
 // $options = [
+//    'action'            => 'fill',
 //    'subject'           => 'document subject',
 //    'description'       => 'document description',
 //    'expires_in'        => 'document expiration date',
@@ -302,6 +304,7 @@ $content = $template->load($guid)->get();
 Sending prepackaged templates as a documents is similar with prefilling:
 ```php
 // $options = [
+//    'action'            => 'send',
 //    'subject'           => 'document subject',
 //    'description'       => 'document description',
 //    'expires_in'        => 'document expiration date',
@@ -343,7 +346,8 @@ $links = $document->getSignerLinks();
 #### 9. Swap templates underlying data
 ```php
 // $options = [
-//    'tags' => [
+//    'action' => 'prefill (or send)',
+//    'tags'   => [
 //        [
 //           'name'  => 'tag name',
 //           'value' => 'tag value (optional)'
@@ -370,9 +374,9 @@ $links = $document->getSignerLinks();
 //    'description'       => 'document description',
 //    'callback_location' => 'callback url after document will be signed'
 // ]
-$document = $template->swapDocument($documentPath, $options, $guid);
+$document = $template->swapTemplate($documentPath, $options, $guid);
 // Swap already preloaded template
-$document = $template->load($guid)->swapDocument($documentPath, $options);
+$document = $template->load($guid)->swapTemplate($documentPath, $options);
 ```
 Where `$documentPath` is a local document path to upload. `swapDocument()` will return an empty `Document` instance (with  guid but not preloaded). 
 
