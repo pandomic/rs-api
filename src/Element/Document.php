@@ -342,12 +342,15 @@ class Document implements ElementInterface
 
     /**
      * Get document signer links
+     * @param string $redirect redirect url
      * @param string $guid
      * @return array
      */
-    public function getSignerLinks($guid = null) {
+    public function getSignerLinks($redirect = null, $guid = null) {
         $guid = $this->resolveGuid($guid);
-        return $this->connection->connect('documents/' . $guid . '/signer_links')->document->signer_links;
+        return $this->connection->connect('documents/' . $guid . '/signer_links', [
+            'redirect_location' => $redirect
+        ])->document->signer_links;
     }
 
     /**
